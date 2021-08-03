@@ -17,6 +17,7 @@ namespace RockPaperScissors
                 Console.WriteLine("Welcome, in this application you will be playing Rock, Paper, Scissors against the computer.");
                 Console.WriteLine("But there is a twist: Lizard and Spock! The game will be decided on a best of 7: first to win 4 rounds is the Winner.");
                 Console.WriteLine("The rules are: Scissors cut Paper covers Rock crushes Lizard poisons Spock smashes Scissors decapitates Lizard eats Paper disproves Spock vaporizes Rock crushes Scissors");
+                Console.WriteLine("");
                 Console.WriteLine("Please choose a player name:");
                 string playerName = Console.ReadLine();
                 Console.WriteLine("Press any key to start the game");
@@ -54,6 +55,10 @@ namespace RockPaperScissors
         //PlayGame method
         public void PlayGame()
         {            
+            this.playerTurnWins = 0;//resetting count
+            this.computerTurnWins = 0;//resetting count
+            this.gameTurns = new List<Turn>();
+            this.turnCount = 0;//resetting turn count
             Game game = new Game();//instantiating object from Game model class            
             game.PlayerTurnWins = 0;//resetting count
             game.ComputerTurnWins = 0;//resetting count
@@ -63,7 +68,7 @@ namespace RockPaperScissors
 
             while (this.playerTurnWins < 4 && this.computerTurnWins < 4)//keep playing turns until one player reach 4 turn wins
             {
-                TurnContext newTurnContext = new TurnContext(game.PlayerName, game.GameID);
+                TurnContext newTurnContext = new TurnContext(game.PlayerName);
                 Turn newTurn = newTurnContext.PlayTurn();
 
                 if (newTurn.PlayerChoice == "rock" || newTurn.PlayerChoice == "paper" || newTurn.PlayerChoice == "scissors" || newTurn.PlayerChoice == "lizard" || newTurn.PlayerChoice == "spock")
@@ -73,6 +78,7 @@ namespace RockPaperScissors
                     Console.WriteLine("Computer chose: " + newTurn.ComputerChoice);
                     this.turnCount++;
                     Turn finishedTurn = newTurnContext.TurnResult(newTurn);//get the result the turn and update the turn object;
+                    finishedTurn.GameID = game.GameID;//passing the GameID to the turn object
                     this.gameTurns.Add(finishedTurn);//add the finished turn to the list of turns of this game
                     incrementCounts(finishedTurn.TurnResult, game);                   
                     Console.WriteLine("This was turn number: " + this.turnCount);
@@ -121,7 +127,7 @@ namespace RockPaperScissors
             Console.WriteLine("You won " + game.PlayerTurnWins + " turns");
             Console.WriteLine("Computer won " + game.ComputerTurnWins + " turns");
             Console.WriteLine("There were " + game.TurnDraws + " draws");
-            Console.WriteLine("There were a total of " + this.gameTurns.Count());
+            Console.WriteLine("There were a total of " + this.gameTurns.Count() + " turns");
             Console.WriteLine("");
 
             if (game.PlayerTurnWins > game.ComputerTurnWins)
@@ -144,9 +150,21 @@ namespace RockPaperScissors
             PlayAgain();
         }
 
+        //PlayAgain method
         public void PlayAgain()
         {
-            Console.ReadLine();
+            Console.WriteLine("");
+            Console.WriteLine("Type 'y' and hit enter to play again");
+            string answer = Console.ReadLine();
+            if (answer == "y")
+            {
+                this.PlayGame();
+            }
+            else
+            {
+                Console.WriteLine("");
+                Console.Write("Thank you for playing!");
+            }
         }
         
 
@@ -164,15 +182,13 @@ namespace RockPaperScissors
     public class TurnContext
     {        
         //Declaring variables
-        public string player;
-        int GameID;
+        public string player;        
         IApplicationRepository applicationRepository;
 
         //CONSTRUCTOR
-        public TurnContext(string player, int GameID)
+        public TurnContext(string player)
         {            
-            this.player = player;
-            this.GameID = GameID;
+            this.player = player;            
             applicationRepository = new ApplicationRepository();
         }
 

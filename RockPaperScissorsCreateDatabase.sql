@@ -7,6 +7,8 @@ GO
 CREATE TABLE Games(
 GameID INT PRIMARY KEY IDENTITY(1,1),
 PlayerName NVARCHAR(MAX),
+PlayerTurnWins INT,
+ComputerTurnWins INT,
 GameResult NVARCHAR(MAX),
 GameEndTime DATETIME
 )

@@ -11,6 +11,14 @@ namespace RockPaperScissors.Models
 {
     public class RockPaperScissorsDbContext : DbContext
     {
+        //Constructor with the connection string defined in App.config
+        public RockPaperScissorsDbContext() : base("RockpaperScissorsDbConn")
+        {
+         
+        }
+
+        DbSet<Turn> Turns { get; set; }
+        DbSet<Game> Games { get; set; }
 
     }
 }

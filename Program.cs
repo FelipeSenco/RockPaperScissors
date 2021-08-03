@@ -32,26 +32,36 @@ namespace RockPaperScissors
     //Game class
     public class GameContext
     {
-        IApplicationRepository applicationrepository;
+        //Decaring variables
+        IApplicationRepository applicationRepository;
+        int playerTurnWins;//global variable to track if a player reach 4 wins to finish the game
+        int computerTurnWins;//global variable to track if a player reach 4 wins to finish the game
         public string  player;
         public int turnCount;//global variable to track the turns
-        //Constructor
+        public List<Turn> gameTurns;//list with the turn objects for this game
+
+        //CONSTRUCTOR
         public GameContext(string player)
         {
             this.player = player;
+            this.playerTurnWins = 0;//resetting count
+            this.computerTurnWins = 0;//resetting count
+            this.gameTurns = new List<Turn>();
             this.turnCount = 0;//resetting turn count
-            applicationrepository = new ApplicationRepository();
+            applicationRepository = new ApplicationRepository();
         }        
+
+        //PlayGame method
         public void PlayGame()
         {            
-            Game game = new Game();//instantiating object from Game model class
+            Game game = new Game();//instantiating object from Game model class            
             game.PlayerTurnWins = 0;//resetting count
             game.ComputerTurnWins = 0;//resetting count
             game.TurnDraws = 0;//resetting count  
             game.PlayerName = this.player;
-            game.GameID = applicationrepository.GetLatestGameID();
+            game.GameID = applicationRepository.GetLatestGameID() + 1;//get lastest gameID and add 1 to be next ID
 
-            while (game.PlayerTurnWins < 4 || game.ComputerTurnWins < 4)//keep playing turns until one player reach 4 turn wins
+            while (this.playerTurnWins < 4 && this.computerTurnWins < 4)//keep playing turns until one player reach 4 turn wins
             {
                 TurnContext newTurnContext = new TurnContext(game.PlayerName, game.GameID);
                 Turn newTurn = newTurnContext.PlayTurn();
@@ -62,7 +72,9 @@ namespace RockPaperScissors
                     Console.WriteLine("You chose: " + newTurn.PlayerChoice);
                     Console.WriteLine("Computer chose: " + newTurn.ComputerChoice);
                     this.turnCount++;
-                    string result = newTurnContext.TurnResult(newTurn);
+                    Turn finishedTurn = newTurnContext.TurnResult(newTurn);//get the result the turn and update the turn object;
+                    this.gameTurns.Add(finishedTurn);//add the finished turn to the list of turns of this game
+                    incrementCounts(finishedTurn.TurnResult, game);                   
                     Console.WriteLine("This was turn number: " + this.turnCount);
                 }
                 else
@@ -70,23 +82,73 @@ namespace RockPaperScissors
                     Console.WriteLine("This option is not valid please choose again.");
                 }               
             }
+
+            FinishGame(game);
                         
         }
 
+
+        //incrementCounts Method
+        public void incrementCounts(string result, Game game)
+        {
+            if (result == "Player won")
+            {
+                game.PlayerTurnWins++;//increment game object property
+                this.playerTurnWins++;//increment class property to track a winner
+            }
+            else if (result == "Computer won")
+            {
+                game.ComputerTurnWins++;//increment game object property
+                this.computerTurnWins++;//increment class property to track a winner
+            }
+            else
+            {
+                game.TurnDraws++;//increment game object property
+            }
+
+            Console.WriteLine("You won: " + game.PlayerTurnWins);
+            Console.WriteLine("Computer won: " + game.ComputerTurnWins);
+            Console.WriteLine("Draws: " + game.TurnDraws);
+        }
+
+
+        //FinishGame Method
         public void FinishGame(Game game)
         {
+            Console.WriteLine("");
+            Console.WriteLine("");
+            Console.WriteLine("Game summary:");
             Console.WriteLine("You won " + game.PlayerTurnWins + " turns");
             Console.WriteLine("Computer won " + game.ComputerTurnWins + " turns");
-            Console.WriteLine("there were " + game.TurnDraws + " draws");
+            Console.WriteLine("There were " + game.TurnDraws + " draws");
+            Console.WriteLine("There were a total of " + this.gameTurns.Count());
+            Console.WriteLine("");
+
             if (game.PlayerTurnWins > game.ComputerTurnWins)
             {
-                Console.WriteLine("You've won the game!");                
+                Console.WriteLine("You've won the game!");
+                game.GameResult = "Player won";
             }
             else
             {
                 Console.WriteLine("Computer has won the game!");
+                game.GameResult = "Computer won";
             }
+            game.GameEndTime = DateTime.Now;
+            applicationRepository.InsertGameInDatabase(game);
+            foreach(var turn in this.gameTurns)
+            {
+                applicationRepository.InsertTurnInDatabase(turn);//iterate through the turns of this game and add them to database
+            }
+
+            PlayAgain();
         }
+
+        public void PlayAgain()
+        {
+            Console.ReadLine();
+        }
+        
 
         string GenerateComputerChoice()
         {
@@ -100,17 +162,21 @@ namespace RockPaperScissors
 
     //Turn class
     public class TurnContext
-    {
-        int turnCount;//declaring global variable to store the number of turns
+    {        
+        //Declaring variables
         public string player;
         int GameID;
         IApplicationRepository applicationRepository;
+
+        //CONSTRUCTOR
         public TurnContext(string player, int GameID)
         {            
             this.player = player;
             this.GameID = GameID;
             applicationRepository = new ApplicationRepository();
         }
+
+        //PlayTurn method
         public Turn PlayTurn()
         {            
             Turn turn = new Turn();//instantianting object from Turn model class            
@@ -119,6 +185,7 @@ namespace RockPaperScissors
             return turn;            
         }
 
+        //GetplayerChoice Method
         public string GetPlayerChoice()
         {
             Console.WriteLine("");
@@ -127,21 +194,25 @@ namespace RockPaperScissors
             return playerChoice;
         }
 
-        public string TurnResult(Turn turn)
+        //TurnResult method
+        public Turn TurnResult(Turn turn)
         {
             switch (turn.PlayerChoice)
             {
                 case "rock":
+                    //player wins
                     if (turn.ComputerChoice == "lizard" || turn.ComputerChoice == "scissors")
                     {
                         Console.WriteLine(turn.PlayerChoice + " defeats " + turn.ComputerChoice + ". You won!");                        
                         turn.TurnResult = "Player won";
                     }
+                    //computer wins
                     else if (turn.ComputerChoice == "spock" || turn.ComputerChoice == "paper")
                     {
                         Console.WriteLine(turn.ComputerChoice + " defeats " + turn.PlayerChoice + ". You loose!");
                         turn.TurnResult = "Computer won";
                     }
+                    //draw
                     else
                     {
                         Console.WriteLine("it's a draw!");
@@ -150,16 +221,19 @@ namespace RockPaperScissors
                     break;
 
                 case "paper":
+                    //player wins
                     if (turn.ComputerChoice == "rock" || turn.ComputerChoice == "spock")
                     {
                         Console.WriteLine(turn.PlayerChoice + " defeats " + turn.ComputerChoice + ". You won!");
                         turn.TurnResult = "Player won";
                     }
+                    //computer wins
                     else if (turn.ComputerChoice == "scissors" || turn.ComputerChoice == "lizard")
                     {
                         Console.WriteLine(turn.ComputerChoice + " defeats " + turn.PlayerChoice + ". You loose!");
                         turn.TurnResult = "Computer won";
                     }
+                    //draw
                     else
                     {
                         Console.WriteLine("it's a draw!");
@@ -168,16 +242,19 @@ namespace RockPaperScissors
                     break;
 
                 case "scissors":
+                    //player wins
                     if (turn.ComputerChoice == "paper" || turn.ComputerChoice == "lizard")
                     {
                         Console.WriteLine(turn.PlayerChoice + " defeats " + turn.ComputerChoice + ". You won!");
                         turn.TurnResult = "Player won";
                     }
+                    //computer wins
                     else if (turn.ComputerChoice == "rock" || turn.ComputerChoice == "spock")
                     {
                         Console.WriteLine(turn.ComputerChoice + " defeats " + turn.PlayerChoice + ". You loose!");
                         turn.TurnResult = "Computer won";
                     }
+                    //draw
                     else
                     {
                         Console.WriteLine("it's a draw!");
@@ -186,16 +263,19 @@ namespace RockPaperScissors
                     break;
 
                 case "lizard":
+                    //player wins
                     if (turn.ComputerChoice == "spock" || turn.ComputerChoice == "paper")
                     {
                         Console.WriteLine(turn.PlayerChoice + " defeats " + turn.ComputerChoice + ". You won!");
                         turn.TurnResult = "Player won";
                     }
+                    //computer wins
                     else if (turn.ComputerChoice == "scissors" || turn.ComputerChoice == "rock")
                     {
                         Console.WriteLine(turn.ComputerChoice + " defeats " + turn.PlayerChoice + ". You loose!");
                         turn.TurnResult = "Computer won";
                     }
+                    //draw
                     else
                     {
                         Console.WriteLine("it's a draw!");
@@ -204,16 +284,19 @@ namespace RockPaperScissors
                     break;
 
                 case "spock":
+                    //player wins
                     if (turn.ComputerChoice == "scissors" || turn.ComputerChoice == "rock")
                     {
                         Console.WriteLine(turn.PlayerChoice + " defeats " + turn.ComputerChoice + ". You won!");
                         turn.TurnResult = "Player won";
                     }
+                    //computer wins
                     else if (turn.ComputerChoice == "lizard" || turn.ComputerChoice == "paper")
                     {
                         Console.WriteLine(turn.ComputerChoice + " defeats " + turn.PlayerChoice + ". You loose!");
                         turn.TurnResult = "Computer won";
                     }
+                    //draw
                     else
                     {
                         Console.WriteLine("it's a draw!");
@@ -222,9 +305,7 @@ namespace RockPaperScissors
                     break;
             }
             turn.TurnEndTime = DateTime.Now;
-            applicationRepository.InsertTurnInDatabase(turn);
-
-            return turn.TurnResult;
+            return turn;
         }        
         
     }

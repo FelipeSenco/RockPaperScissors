@@ -11,7 +11,7 @@ namespace RockPaperScissors.Repositories
     {
         void InsertTurnInDatabase(Turn turn);
         void InsertGameInDatabase(Game game);
-        int GetLatestGameID();
+        int GetLatestGameID();        
     }
     public class ApplicationRepository : IApplicationRepository
     {
@@ -43,6 +43,6 @@ namespace RockPaperScissors.Repositories
             {
                 return 0;
             }
-        }
+        }        
     }
 }

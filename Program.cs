@@ -123,21 +123,23 @@ namespace RockPaperScissors
         {
             Console.WriteLine("");
             Console.WriteLine("");
-            Console.WriteLine("Game summary:");
+            Console.WriteLine("GAME SUMMARY:");
             Console.WriteLine("You won " + game.PlayerTurnWins + " turns");
             Console.WriteLine("Computer won " + game.ComputerTurnWins + " turns");
             Console.WriteLine("There were " + game.TurnDraws + " draws");
             Console.WriteLine("There were a total of " + this.gameTurns.Count() + " turns");
+            DisplayPlayerMostUsed(this.gameTurns);
+            DisplayComputerMostUsed(this.gameTurns);
             Console.WriteLine("");
 
             if (game.PlayerTurnWins > game.ComputerTurnWins)
             {
-                Console.WriteLine("You've won the game!");
+                Console.WriteLine("Congratilations! You've won the game!");
                 game.GameResult = "Player won";
             }
             else
             {
-                Console.WriteLine("Computer has won the game!");
+                Console.WriteLine("Oops! Computer has won the game!");
                 game.GameResult = "Computer won";
             }
             game.GameEndTime = DateTime.Now;
@@ -149,6 +151,52 @@ namespace RockPaperScissors
 
             PlayAgain();
         }
+
+        public void DisplayComputerMostUsed(List<Turn> turns)
+        {
+            List<String> computerMoves = new List<String>();            
+
+            foreach (var turn in turns)
+            {
+                computerMoves.Add(turn.ComputerChoice);                
+            }
+
+            var computerMoveGroup = computerMoves.GroupBy(x => x);
+            var computerMaxCount = computerMoveGroup.Max(g => g.Count());
+            var computerMostCommons = computerMoveGroup.Where(x => x.Count() == computerMaxCount).Select(x => x.Key).ToArray();
+
+            Console.WriteLine("");
+            Console.WriteLine("Computer most used choice(s):");
+            foreach(var usedChoice in computerMostCommons)
+            {
+                Console.WriteLine(usedChoice);
+            }
+            Console.WriteLine("Used " + computerMaxCount + " time(s)");
+        }
+
+        public void DisplayPlayerMostUsed(List<Turn> turns)
+        {
+            List<String> playerMoves = new List<String>();
+
+            foreach (var turn in turns)
+            {
+                playerMoves.Add(turn.PlayerChoice);
+            }
+
+            var playerMoveGroup = playerMoves.GroupBy(x => x);
+            var playerMaxCount = playerMoveGroup.Max(g => g.Count());
+            var playerMostCommons = playerMoveGroup.Where(x => x.Count() == playerMaxCount).Select(x => x.Key).ToArray();
+
+            Console.WriteLine("");
+            Console.WriteLine("Your most used choice(s):");
+            foreach (var usedChoice in playerMostCommons)
+            {
+                Console.WriteLine(usedChoice);
+            }
+            Console.WriteLine("Used " + playerMaxCount + " time(s)");
+        }
+
+
 
         //PlayAgain method
         public void PlayAgain()

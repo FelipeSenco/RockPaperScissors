@@ -12,6 +12,8 @@ namespace RockPaperScissors.Models
     public class RockPaperScissorsDbContext : DbContext
     {
         //Constructor with the connection string defined in App.config
+        //Please replace the Data Source property of the connection string to your own loal server at App.config
+        //The .sql file used to create the database is in the project folder
         public RockPaperScissorsDbContext() : base("RockPaperScissorsDbConn")
         {
          

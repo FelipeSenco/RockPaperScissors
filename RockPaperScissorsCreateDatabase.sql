@@ -22,6 +22,6 @@ PlayerChoice NVARCHAR(MAX),
 ComputerChoice NVARCHAR(MAX),
 TurnResult NVARCHAR(MAX),
 TurnEndTime DATETIME,
-GameID INT 
+GameID INT REFERENCES Games(GameID) ON DELETE CASCADE
 )
 GO

@@ -10,12 +10,13 @@ namespace RockPaperScissors
 {
     public class GameContext
     {
-        //Decaring variables
-        IApplicationRepository applicationRepository;
+        //Decaring variables        
         int playerTurnWins;//global variable to track if a player reach 4 wins to finish the game
         int computerTurnWins;//global variable to track if a player reach 4 wins to finish the game
+        int turnDraws;//global variable to track turn draws
+        string gameResult;//variable to store the game result
         public string player;        
-        public List<Turn> gameTurns;//list with the turn objects for this game
+        public List<TurnModel> gameTurns;//list to store the turn objects for this game
 
         //CONSTRUCTOR
         public GameContext(string player)
@@ -23,39 +24,27 @@ namespace RockPaperScissors
             this.player = player;
             this.playerTurnWins = 0;//resetting count
             this.computerTurnWins = 0;//resetting count
-            this.gameTurns = new List<Turn>();            
-            applicationRepository = new ApplicationRepository();
+            this.turnDraws = 0;//resetting count
+            this.gameTurns = new List<TurnModel>();                        
         }
 
         //PlayGame method
-        public void PlayGame()
-        {
-            //resetting variables again in case the player choose to play again at the end of a game
-            this.playerTurnWins = 0;//resetting count
-            this.computerTurnWins = 0;//resetting count
-            this.gameTurns = new List<Turn>();//resetting turns list            
-
-            Game game = new Game();//instantiating object from Game model class            
-            game.PlayerTurnWins = 0;//resetting count
-            game.ComputerTurnWins = 0;//resetting count
-            game.TurnDraws = 0;//resetting count  
-            game.PlayerName = this.player;
-            game.GameID = applicationRepository.GetLatestGameID() + 1;//get lastest gameID and add 1 to be next ID
-
+        public bool PlayGame()
+        {                                                       
             while (this.playerTurnWins < 4 && this.computerTurnWins < 4)//keep playing turns until one player reach 4 turn wins
             {
-                TurnContext newTurnContext = new TurnContext(game.PlayerName);
-                Turn newTurn = newTurnContext.PlayTurn();
+                TurnContext currentTurnContext = new TurnContext(this.player);//creating an objec for the turn context
+                TurnModel currentturn = currentTurnContext.PlayTurn();//creating an object for the turn model
 
-                if (newTurn.PlayerChoice == "rock" || newTurn.PlayerChoice == "paper" || newTurn.PlayerChoice == "scissors" || newTurn.PlayerChoice == "lizard" || newTurn.PlayerChoice == "spock")
+                if (currentturn.PlayerChoice == "rock" || currentturn.PlayerChoice == "paper" || currentturn.PlayerChoice == "scissors" || currentturn.PlayerChoice == "lizard" || currentturn.PlayerChoice == "spock")
                 {
-                    newTurn.ComputerChoice = GenerateComputerChoice(); ;
-                    Console.WriteLine("You chose: " + newTurn.PlayerChoice);
-                    Console.WriteLine("Computer chose: " + newTurn.ComputerChoice);                    
-                    Turn finishedTurn = newTurnContext.TurnResult(newTurn);//get the result the turn and update the turn object;
-                    finishedTurn.GameID = game.GameID;//passing the GameID to the turn object
-                    this.gameTurns.Add(finishedTurn);//add the finished turn to the list of turns of this game
-                    incrementCounts(finishedTurn.TurnResult, game);
+                    currentturn.ComputerChoice = GenerateComputerChoice(); ;
+                    Console.WriteLine("You chose: " + currentturn.PlayerChoice);
+                    Console.WriteLine("Computer chose: " + currentturn.ComputerChoice);
+                    string turnResult = currentTurnContext.TurnResult(currentturn);//get the result the turn and update the turn object;
+                    //finishedTurn.GameID = game.GameID;//passing the GameID to the turn object
+                    this.gameTurns.Add(currentturn);//add the finished turn to the list of turns of this game
+                    IncrementCounts(turnResult);
                     Console.WriteLine("This was turn number: " + this.gameTurns.Count());
                 }
                 else
@@ -64,132 +53,116 @@ namespace RockPaperScissors
                 }
             }
 
-            FinishGame(game);//Finish game once a player reach 4 wins and the while loop is interrupted
+            return FinishGame();//Finish game once a player reach 4 wins and the while loop is interrupted
 
         }
 
 
         //incrementCounts Method
-        public void incrementCounts(string result, Game game)
+        public void IncrementCounts(string result)
         {
             if (result == "Player won")
-            {
-                game.PlayerTurnWins++;//increment game object property
+            {                
                 this.playerTurnWins++;//increment class property to track a winner
             }
             else if (result == "Computer won")
-            {
-                game.ComputerTurnWins++;//increment game object property
+            {                
                 this.computerTurnWins++;//increment class property to track a winner
             }
             else
             {
-                game.TurnDraws++;//increment game object property
+                this.turnDraws++;//increment game object property
             }
 
-            Console.WriteLine("You won: " + game.PlayerTurnWins);
-            Console.WriteLine("Computer won: " + game.ComputerTurnWins);
-            Console.WriteLine("Draws: " + game.TurnDraws);
+            Console.WriteLine("You won: " + this.playerTurnWins);
+            Console.WriteLine("Computer won: " + this.computerTurnWins);
+            Console.WriteLine("Draws: " + this.turnDraws);
         }
 
 
         //FinishGame Method
-        public void FinishGame(Game game)
+        public bool FinishGame()
         {
             Console.WriteLine("");
             Console.WriteLine("");
             Console.WriteLine("GAME SUMMARY:");
-            Console.WriteLine("You won " + game.PlayerTurnWins + " turns");
-            Console.WriteLine("Computer won " + game.ComputerTurnWins + " turns");
-            Console.WriteLine("There were " + game.TurnDraws + " draws");
+            Console.WriteLine("You won " + this.playerTurnWins + " turns");
+            Console.WriteLine("Computer won " + this.computerTurnWins + " turns");
+            Console.WriteLine("There were " + this.turnDraws + " draws");
             Console.WriteLine("There were a total of " + this.gameTurns.Count() + " turns");
-            DisplayPlayerMostUsed(this.gameTurns);
-            DisplayComputerMostUsed(this.gameTurns);
+            DisplayMostUsedMoves(this.gameTurns);
+            DisplayMostUsedMoves(this.gameTurns, false);
             Console.WriteLine("");
 
-            if (game.PlayerTurnWins > game.ComputerTurnWins)
+            if (this.playerTurnWins > this.computerTurnWins)
             {
                 Console.WriteLine("Congratilations! You've won the game!");
-                game.GameResult = "Player won";
+                this.gameResult = "Player won";
             }
             else
             {
                 Console.WriteLine("Oops! Computer has won the game!");
-                game.GameResult = "Computer won";
-            }
+                this.gameResult = "Computer won";
+            }                     
 
-            game.GameEndTime = DateTime.Now;
-
-            applicationRepository.InsertGameInDatabase(game);//calling repository to add the game to database
-            foreach (var turn in this.gameTurns)
-            {
-                applicationRepository.InsertTurnInDatabase(turn);//iterate through the turns of this game and add them to database
-            }
-
-            PlayAgain();
+            return PlayAgain();
         }
 
-        public void DisplayComputerMostUsed(List<Turn> turns)
+        public void DisplayMostUsedMoves(List<TurnModel> turns, bool isPlayer = true)
         {
-            List<String> computerMoves = new List<String>();
+            List<String> moves = new List<String>(); //list to store the moves of the game
 
-            foreach (var turn in turns)
+            foreach (var turn in turns)//iterate through the turn list for this game
             {
-                computerMoves.Add(turn.ComputerChoice);
+                string choice;
+                choice = isPlayer ? turn.PlayerChoice : turn.ComputerChoice; //check to see isPlayer                               
+                moves.Add(choice); //ad move to moves list
             }
 
-            var computerMoveGroup = computerMoves.GroupBy(x => x);
-            var computerMaxCount = computerMoveGroup.Max(g => g.Count());
-            var computerMostCommons = computerMoveGroup.Where(x => x.Count() == computerMaxCount).Select(x => x.Key).ToArray();
+            var moveGroup = moves.GroupBy(x => x);
+            var maxCount = moveGroup.Max(g => g.Count());
+            var mostCommons = moveGroup.Where(x => x.Count() == maxCount).Select(x => x.Key).ToArray();
 
             Console.WriteLine("");
-            Console.WriteLine("Computer most used choice(s):");
-            foreach (var usedChoice in computerMostCommons)
+            string message = isPlayer ? "Your most used choice(s):" : "Computer most used choice(s):";
+            Console.WriteLine(message);
+            foreach (var usedChoice in mostCommons)
             {
                 Console.WriteLine(usedChoice);
             }
-            Console.WriteLine("Used " + computerMaxCount + " time(s)");
-        }
-
-        public void DisplayPlayerMostUsed(List<Turn> turns)
-        {
-            List<String> playerMoves = new List<String>();
-
-            foreach (var turn in turns)
-            {
-                playerMoves.Add(turn.PlayerChoice);
-            }
-
-            var playerMoveGroup = playerMoves.GroupBy(x => x);
-            var playerMaxCount = playerMoveGroup.Max(g => g.Count());
-            var playerMostCommons = playerMoveGroup.Where(x => x.Count() == playerMaxCount).Select(x => x.Key).ToArray();
-
-            Console.WriteLine("");
-            Console.WriteLine("Your most used choice(s):");
-            foreach (var usedChoice in playerMostCommons)
-            {
-                Console.WriteLine(usedChoice);
-            }
-            Console.WriteLine("Used " + playerMaxCount + " time(s)");
-        }
-
-
+            Console.WriteLine("Used " + maxCount + " time(s)");
+        }        
 
         //PlayAgain method
-        public void PlayAgain()
+        public bool PlayAgain()
         {
             Console.WriteLine("");
             Console.WriteLine("Type 'y' and hit enter to play again");
             string answer = Console.ReadLine();
             if (answer == "y")
             {
-                this.PlayGame();
+                return true;
             }
             else
             {
                 Console.WriteLine("");
                 Console.Write("Thank you for playing!");
+                return false;
             }
+        }
+
+        public void AddGameToDatabase()
+        {            
+            GameModel game = new GameModel();//creating an object of game model to send to repository
+            game.PlayerName = this.player;
+            game.PlayerTurnWins = this.playerTurnWins;
+            game.ComputerTurnWins = this.computerTurnWins;
+            game.TurnDraws = this.turnDraws;
+            game.GameResult = this.gameResult;
+            game.GameEndTime = DateTime.Now;
+
+            IApplicationRepository repository = new ApplicationRepository();//creating an instance of repository to call database related method
+            repository.InsertGameInDatabase(game, this.gameTurns);
         }
 
 

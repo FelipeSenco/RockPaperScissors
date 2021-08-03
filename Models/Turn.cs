@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RockPaperScissors.Models
 {
-    public class Turn
+    public class TurnModel
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -23,7 +23,7 @@ namespace RockPaperScissors.Models
         public string TurnResult { get; set; }
 
         public DateTime TurnEndTime { get; set; }
-
+        
         public int GameID { get; set; }        
     }
 }

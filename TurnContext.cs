@@ -22,9 +22,9 @@ namespace RockPaperScissors
         }
 
         //PlayTurn method
-        public Turn PlayTurn()
+        public TurnModel PlayTurn()
         {
-            Turn turn = new Turn();//instantianting object from Turn model class            
+            TurnModel turn = new TurnModel();//instantianting object from Turn model class            
             turn.PlayerName = this.player;
             turn.PlayerChoice = GetPlayerChoice();
             return turn;
@@ -40,7 +40,7 @@ namespace RockPaperScissors
         }
 
         //TurnResult method
-        public Turn TurnResult(Turn turn)
+        public string TurnResult(TurnModel turn)
         {
             switch (turn.PlayerChoice)
             {
@@ -148,9 +148,8 @@ namespace RockPaperScissors
                         turn.TurnResult = "Draw";
                     }
                     break;
-            }
-            turn.TurnEndTime = DateTime.Now;
-            return turn;
+            }            
+            return turn.TurnResult;
         }
 
     }

@@ -9,8 +9,8 @@ namespace RockPaperScissors.Repositories
 {
     public interface IApplicationRepository
     {
-        void InsertTurnInDatabase(Turn turn);
-        void InsertGameInDatabase(Game game);
+        void InsertTurnsInDatabase(List<TurnModel> turns);
+        void InsertGameInDatabase(GameModel game, List<TurnModel> turns);
         int GetLatestGameID();        
     }
     public class ApplicationRepository : IApplicationRepository
@@ -21,14 +21,15 @@ namespace RockPaperScissors.Repositories
             db = new RockPaperScissorsDbContext();
         }
 
-        public void InsertTurnInDatabase(Turn turn)
+        public void InsertTurnsInDatabase(List<TurnModel> turns)
         {
-            db.Turns.Add(turn);
+            db.Turns.AddRange(turns); 
             db.SaveChanges();
         }
-        public void InsertGameInDatabase(Game game)
+        public void InsertGameInDatabase(GameModel game, List<TurnModel> turns)
         {
             db.Games.Add(game);
+            InsertTurnsInDatabase(turns);
             db.SaveChanges();
         }
         public int GetLatestGameID()

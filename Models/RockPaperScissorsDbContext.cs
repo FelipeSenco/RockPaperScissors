@@ -19,8 +19,8 @@ namespace RockPaperScissors.Models
          
         }
 
-        public DbSet<TurnModel> Turns { get; set; }
-        public DbSet<GameModel> Games { get; set; }
+        public DbSet<Turn> Turns { get; set; }
+        public DbSet<Game> Games { get; set; }
 
     }
 }

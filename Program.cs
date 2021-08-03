@@ -23,10 +23,10 @@ namespace RockPaperScissors
 
                 bool gamePlaying = true;
 
-                while (gamePlaying)
+                while (gamePlaying) //loop to check if there will be another game after one finishes
                 {
                     GameContext newGameContext = new GameContext(playerName);
-                    newGameContext.PlayGame();
+                    gamePlaying = newGameContext.PlayGame();//this variable will be false if the user decides not play(see PlayAgain() at GameContext.cs)
                 }                
            
         }

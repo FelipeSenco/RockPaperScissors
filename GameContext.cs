@@ -16,7 +16,7 @@ namespace RockPaperScissors
         int turnDraws;//global variable to track turn draws
         string gameResult;//variable to store the game result
         public string player;        
-        public List<TurnModel> gameTurns;//list to store the turn objects for this game
+        public List<Turn> gameTurns;//list to store the turn objects for this game
 
         //CONSTRUCTOR
         public GameContext(string player)
@@ -25,7 +25,7 @@ namespace RockPaperScissors
             this.playerTurnWins = 0;//resetting count
             this.computerTurnWins = 0;//resetting count
             this.turnDraws = 0;//resetting count
-            this.gameTurns = new List<TurnModel>();                        
+            this.gameTurns = new List<Turn>();                        
         }
 
         //PlayGame method
@@ -33,31 +33,49 @@ namespace RockPaperScissors
         {                                                       
             while (this.playerTurnWins < 4 && this.computerTurnWins < 4)//keep playing turns until one player reach 4 turn wins
             {
-                TurnContext currentTurnContext = new TurnContext(this.player);//creating an objec for the turn context
-                TurnModel currentturn = currentTurnContext.PlayTurn();//creating an object for the turn model
+                TurnContext currentTurn = new TurnContext(this.player);//creating an objec for the turn context  class              
+                currentTurn.GetPlayerChoice();//get the player move choice
 
-                if (currentturn.PlayerChoice == "rock" || currentturn.PlayerChoice == "paper" || currentturn.PlayerChoice == "scissors" || currentturn.PlayerChoice == "lizard" || currentturn.PlayerChoice == "spock")
+                if (currentTurn.playerChoice == "rock" || currentTurn.playerChoice == "paper" || currentTurn.playerChoice == "scissors" || currentTurn.playerChoice == "lizard" || currentTurn.playerChoice == "spock")
                 {
-                    currentturn.ComputerChoice = GenerateComputerChoice(); ;
-                    Console.WriteLine("You chose: " + currentturn.PlayerChoice);
-                    Console.WriteLine("Computer chose: " + currentturn.ComputerChoice);
-                    string turnResult = currentTurnContext.TurnResult(currentturn);//get the result the turn and update the turn object;
-                    //finishedTurn.GameID = game.GameID;//passing the GameID to the turn object
-                    this.gameTurns.Add(currentturn);//add the finished turn to the list of turns of this game
-                    IncrementCounts(turnResult);
-                    Console.WriteLine("This was turn number: " + this.gameTurns.Count());
+                    Console.WriteLine("Turn Number: " + (this.gameTurns.Count() + 1));//get the current turn number by adding 1 to the list of turns                    
+
+                    currentTurn.computerChoice = GenerateComputerChoice();
+
+                    Console.WriteLine("You chose: " + currentTurn.playerChoice);
+                    Console.WriteLine("Computer chose: " + currentTurn.computerChoice);
+
+                    currentTurn.GetTurnResult();//get the result the turn from TurnContext.cs method;
+                                                //
+                    IncrementCounts(currentTurn.turnResult);//calling IncrementAndDisplayCounts to update values
+
+                    Console.WriteLine("You won: " + this.playerTurnWins);
+                    Console.WriteLine("Computer won: " + this.computerTurnWins);
+                    Console.WriteLine("Draws: " + this.turnDraws);
+
+                    AddTurnsToList(currentTurn); //add the current turn to the list of Turn objects that will be sent to database  after the game ends           
                 }
                 else
                 {
                     Console.WriteLine("This option is not valid please choose again.");
                 }
             }
+            //interactions after leaving the game loop
+            Console.WriteLine("");
+            Console.WriteLine("");
+            Console.WriteLine("GAME SUMMARY:");
+            Console.WriteLine("You won " + this.playerTurnWins + " turns");
+            Console.WriteLine("Computer won " + this.computerTurnWins + " turns");
+            Console.WriteLine("There were " + this.turnDraws + " draws");
+            Console.WriteLine("There were a total of " + this.gameTurns.Count() + " turns");
+            DisplayMostUsedMoves(this.gameTurns);//displays the player most used moves
+            DisplayMostUsedMoves(this.gameTurns, false);//display the computer most used moves as isPlayer argument is false
+            Console.WriteLine("");
 
             return FinishGame();//Finish game once a player reach 4 wins and the while loop is interrupted
 
         }
-
-
+        
         //incrementCounts Method
         public void IncrementCounts(string result)
         {
@@ -73,27 +91,14 @@ namespace RockPaperScissors
             {
                 this.turnDraws++;//increment game object property
             }
-
-            Console.WriteLine("You won: " + this.playerTurnWins);
-            Console.WriteLine("Computer won: " + this.computerTurnWins);
-            Console.WriteLine("Draws: " + this.turnDraws);
+            
         }
 
 
         //FinishGame Method
         public bool FinishGame()
         {
-            Console.WriteLine("");
-            Console.WriteLine("");
-            Console.WriteLine("GAME SUMMARY:");
-            Console.WriteLine("You won " + this.playerTurnWins + " turns");
-            Console.WriteLine("Computer won " + this.computerTurnWins + " turns");
-            Console.WriteLine("There were " + this.turnDraws + " draws");
-            Console.WriteLine("There were a total of " + this.gameTurns.Count() + " turns");
-            DisplayMostUsedMoves(this.gameTurns);
-            DisplayMostUsedMoves(this.gameTurns, false);
-            Console.WriteLine("");
-
+            
             if (this.playerTurnWins > this.computerTurnWins)
             {
                 Console.WriteLine("Congratilations! You've won the game!");
@@ -103,12 +108,13 @@ namespace RockPaperScissors
             {
                 Console.WriteLine("Oops! Computer has won the game!");
                 this.gameResult = "Computer won";
-            }                     
+            }
 
+            AddGameToDatabase();//calling method to insert the game data and its turns in the database
             return PlayAgain();
         }
 
-        public void DisplayMostUsedMoves(List<TurnModel> turns, bool isPlayer = true)
+        public void DisplayMostUsedMoves(List<Turn> turns, bool isPlayer = true)
         {
             List<String> moves = new List<String>(); //list to store the moves of the game
 
@@ -151,9 +157,23 @@ namespace RockPaperScissors
             }
         }
 
-        public void AddGameToDatabase()
+        public void AddTurnsToList(TurnContext currentTurn)//this method will pass the TurnContext object properties to a TurnModel object that will be stored in a list for further insertion at databse
+        {
+            IApplicationRepository repository = new ApplicationRepository();//instantiating a repository to get the current gameID using getLatestGameID();
+            
+            Turn turn = new Turn();
+            turn.GameID = repository.GetLatestGameID() + 1;
+            turn.PlayerName = currentTurn.player;
+            turn.PlayerChoice = currentTurn.playerChoice;
+            turn.ComputerChoice = currentTurn.computerChoice;
+            turn.TurnResult = currentTurn.turnResult;
+            turn.TurnEndTime = DateTime.Now;            
+            this.gameTurns.Add(turn);//finally add the turn to list that will be accessed at AddGameToDatabase to add the turns of the game to the turns table
+        }
+
+        public void AddGameToDatabase() //method to call the repository and pass the game and turns models to be added at their respective table at database
         {            
-            GameModel game = new GameModel();//creating an object of game model to send to repository
+            Game game = new Game();//creating an object of game model to send to repository
             game.PlayerName = this.player;
             game.PlayerTurnWins = this.playerTurnWins;
             game.ComputerTurnWins = this.computerTurnWins;

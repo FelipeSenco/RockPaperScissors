@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RockPaperScissors.Models
 {
-    public class TurnModel
+    public class Turn
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

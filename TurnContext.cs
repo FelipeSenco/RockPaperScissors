@@ -12,144 +12,136 @@ namespace RockPaperScissors
     {
         //Declaring variables
         public string player;
-        IApplicationRepository applicationRepository;
-
+        public string playerChoice;
+        public string computerChoice;
+        public string turnResult;
+        public DateTime turnEndTime;       
+       
         //CONSTRUCTOR
         public TurnContext(string player)
         {
-            this.player = player;
-            applicationRepository = new ApplicationRepository();
+            this.player = player;            
         }
-
-        //PlayTurn method
-        public TurnModel PlayTurn()
-        {
-            TurnModel turn = new TurnModel();//instantianting object from Turn model class            
-            turn.PlayerName = this.player;
-            turn.PlayerChoice = GetPlayerChoice();
-            return turn;
-        }
-
+        
         //GetplayerChoice Method
-        public string GetPlayerChoice()
+        public void GetPlayerChoice()
         {
             Console.WriteLine("");
             Console.WriteLine(this.player + " choose an option: Rock, Paper, Scissors, Lizard or Spock (not case sensitive)");
             string playerChoice = Console.ReadLine().ToLower();
-            return playerChoice;
+            this.playerChoice = playerChoice;
         }
 
         //TurnResult method
-        public string TurnResult(TurnModel turn)
+        public void GetTurnResult()
         {
-            switch (turn.PlayerChoice)
+            switch (this.playerChoice)
             {
                 case "rock":
                     //player wins
-                    if (turn.ComputerChoice == "lizard" || turn.ComputerChoice == "scissors")
+                    if (this.computerChoice == "lizard" || this.computerChoice == "scissors")
                     {
-                        Console.WriteLine(turn.PlayerChoice + " defeats " + turn.ComputerChoice + ". You won!");
-                        turn.TurnResult = "Player won";
+                        Console.WriteLine(this.playerChoice + " defeats " + this.computerChoice + ". You won!");
+                        this.turnResult = "Player won";
                     }
                     //computer wins
-                    else if (turn.ComputerChoice == "spock" || turn.ComputerChoice == "paper")
+                    else if (this.computerChoice == "spock" || this.computerChoice == "paper")
                     {
-                        Console.WriteLine(turn.ComputerChoice + " defeats " + turn.PlayerChoice + ". You loose!");
-                        turn.TurnResult = "Computer won";
+                        Console.WriteLine(this.computerChoice + " defeats " + this.playerChoice + ". You loose!");
+                        this.turnResult = "Computer won";
                     }
                     //draw
                     else
                     {
                         Console.WriteLine("it's a draw!");
-                        turn.TurnResult = "Draw";
+                        this.turnResult = "Draw";
                     }
                     break;
 
                 case "paper":
                     //player wins
-                    if (turn.ComputerChoice == "rock" || turn.ComputerChoice == "spock")
+                    if (this.computerChoice == "rock" || this.computerChoice == "spock")
                     {
-                        Console.WriteLine(turn.PlayerChoice + " defeats " + turn.ComputerChoice + ". You won!");
-                        turn.TurnResult = "Player won";
+                        Console.WriteLine(this.playerChoice + " defeats " + this.computerChoice + ". You won!");
+                        this.turnResult = "Player won";
                     }
                     //computer wins
-                    else if (turn.ComputerChoice == "scissors" || turn.ComputerChoice == "lizard")
+                    else if (this.computerChoice == "scissors" || this.computerChoice == "lizard")
                     {
-                        Console.WriteLine(turn.ComputerChoice + " defeats " + turn.PlayerChoice + ". You loose!");
-                        turn.TurnResult = "Computer won";
+                        Console.WriteLine(this.computerChoice + " defeats " + this.playerChoice + ". You loose!");
+                        this.turnResult = "Computer won";
                     }
                     //draw
                     else
                     {
                         Console.WriteLine("it's a draw!");
-                        turn.TurnResult = "Draw";
+                        this.turnResult = "Draw";
                     }
                     break;
 
                 case "scissors":
                     //player wins
-                    if (turn.ComputerChoice == "paper" || turn.ComputerChoice == "lizard")
+                    if (this.computerChoice == "paper" || this.computerChoice == "lizard")
                     {
-                        Console.WriteLine(turn.PlayerChoice + " defeats " + turn.ComputerChoice + ". You won!");
-                        turn.TurnResult = "Player won";
+                        Console.WriteLine(this.playerChoice + " defeats " + this.computerChoice + ". You won!");
+                        this.turnResult = "Player won";
                     }
                     //computer wins
-                    else if (turn.ComputerChoice == "rock" || turn.ComputerChoice == "spock")
+                    else if (this.computerChoice == "rock" || this.computerChoice == "spock")
                     {
-                        Console.WriteLine(turn.ComputerChoice + " defeats " + turn.PlayerChoice + ". You loose!");
-                        turn.TurnResult = "Computer won";
+                        Console.WriteLine(this.computerChoice + " defeats " + this.playerChoice + ". You loose!");
+                        this.turnResult = "Computer won";
                     }
                     //draw
                     else
                     {
                         Console.WriteLine("it's a draw!");
-                        turn.TurnResult = "Draw";
+                        this.turnResult = "Draw";
                     }
                     break;
 
                 case "lizard":
                     //player wins
-                    if (turn.ComputerChoice == "spock" || turn.ComputerChoice == "paper")
+                    if (this.computerChoice == "spock" || this.computerChoice == "paper")
                     {
-                        Console.WriteLine(turn.PlayerChoice + " defeats " + turn.ComputerChoice + ". You won!");
-                        turn.TurnResult = "Player won";
+                        Console.WriteLine(this.playerChoice + " defeats " + this.computerChoice + ". You won!");
+                        this.turnResult = "Player won";
                     }
                     //computer wins
-                    else if (turn.ComputerChoice == "scissors" || turn.ComputerChoice == "rock")
+                    else if (this.computerChoice == "scissors" || this.computerChoice == "rock")
                     {
-                        Console.WriteLine(turn.ComputerChoice + " defeats " + turn.PlayerChoice + ". You loose!");
-                        turn.TurnResult = "Computer won";
+                        Console.WriteLine(this.computerChoice + " defeats " + this.playerChoice + ". You loose!");
+                        this.turnResult = "Computer won";
                     }
                     //draw
                     else
                     {
                         Console.WriteLine("it's a draw!");
-                        turn.TurnResult = "Draw";
+                        this.turnResult = "Draw";
                     }
                     break;
 
                 case "spock":
                     //player wins
-                    if (turn.ComputerChoice == "scissors" || turn.ComputerChoice == "rock")
+                    if (this.computerChoice == "scissors" || this.computerChoice == "rock")
                     {
-                        Console.WriteLine(turn.PlayerChoice + " defeats " + turn.ComputerChoice + ". You won!");
-                        turn.TurnResult = "Player won";
+                        Console.WriteLine(this.playerChoice + " defeats " + this.computerChoice + ". You won!");
+                        this.turnResult = "Player won";
                     }
                     //computer wins
-                    else if (turn.ComputerChoice == "lizard" || turn.ComputerChoice == "paper")
+                    else if (this.computerChoice == "lizard" || this.computerChoice == "paper")
                     {
-                        Console.WriteLine(turn.ComputerChoice + " defeats " + turn.PlayerChoice + ". You loose!");
-                        turn.TurnResult = "Computer won";
+                        Console.WriteLine(this.computerChoice + " defeats " + this.playerChoice + ". You loose!");
+                        this.turnResult = "Computer won";
                     }
                     //draw
                     else
                     {
                         Console.WriteLine("it's a draw!");
-                        turn.TurnResult = "Draw";
+                        this.turnResult = "Draw";
                     }
                     break;
-            }            
-            return turn.TurnResult;
+            }                        
         }
 
     }

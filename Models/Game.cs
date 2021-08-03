@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RockPaperScissors.Models
 {
-    public class GameModel
+    public class Game
     {
         [Key]        
         public int GameID { get; set; }

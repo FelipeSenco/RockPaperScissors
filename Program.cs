@@ -34,27 +34,67 @@ namespace RockPaperScissors
     {
         IApplicationRepository applicationrepository;
         public string  player;
+        public int turnCount;//global variable to track the turns
         //Constructor
         public GameContext(string player)
         {
             this.player = player;
+            this.turnCount = 0;//resetting turn count
             applicationrepository = new ApplicationRepository();
         }        
         public void PlayGame()
         {            
             Game game = new Game();//instantiating object from Game model class
             game.PlayerTurnWins = 0;//resetting count
-            game.ComputerTurnWins = 0;//resetting count                        
+            game.ComputerTurnWins = 0;//resetting count
+            game.TurnDraws = 0;//resetting count  
             game.PlayerName = this.player;
             game.GameID = applicationrepository.GetLatestGameID();
 
             while (game.PlayerTurnWins < 4 || game.ComputerTurnWins < 4)//keep playing turns until one player reach 4 turn wins
             {
-                TurnContext newTurn = new TurnContext(game.PlayerName, game.GameID);
-                newTurn.PlayTurn();                
+                TurnContext newTurnContext = new TurnContext(game.PlayerName, game.GameID);
+                Turn newTurn = newTurnContext.PlayTurn();
+
+                if (newTurn.PlayerChoice == "rock" || newTurn.PlayerChoice == "paper" || newTurn.PlayerChoice == "scissors" || newTurn.PlayerChoice == "lizard" || newTurn.PlayerChoice == "spock")
+                {                    
+                    newTurn.ComputerChoice = GenerateComputerChoice(); ;
+                    Console.WriteLine("You chose: " + newTurn.PlayerChoice);
+                    Console.WriteLine("Computer chose: " + newTurn.ComputerChoice);
+                    this.turnCount++;
+                    string result = newTurnContext.TurnResult(newTurn);
+                    Console.WriteLine("This was turn number: " + this.turnCount);
+                }
+                else
+                {
+                    Console.WriteLine("This option is not valid please choose again.");
+                }               
             }
-        }     
-        
+                        
+        }
+
+        public void FinishGame(Game game)
+        {
+            Console.WriteLine("You won " + game.PlayerTurnWins + " turns");
+            Console.WriteLine("Computer won " + game.ComputerTurnWins + " turns");
+            Console.WriteLine("there were " + game.TurnDraws + " draws");
+            if (game.PlayerTurnWins > game.ComputerTurnWins)
+            {
+                Console.WriteLine("You've won the game!");                
+            }
+            else
+            {
+                Console.WriteLine("Computer has won the game!");
+            }
+        }
+
+        string GenerateComputerChoice()
+        {
+            var randomFactor = new Random();
+            var possibleChoices = new List<string> { "rock", "paper", "scissors", "lizard", "spock" };
+            int randomIndex = randomFactor.Next(possibleChoices.Count);
+            return possibleChoices[randomIndex];
+        }
     }
 
 
@@ -71,25 +111,12 @@ namespace RockPaperScissors
             this.GameID = GameID;
             applicationRepository = new ApplicationRepository();
         }
-        public void PlayTurn()
-        {
-            string playerChoice = GetPlayerChoice();
-            Turn turn = new Turn();//instantianting object from Turn model class
-            turn.PlayerName = this.player;            
-            
-            if (playerChoice == "rock" || playerChoice == "paper" || playerChoice == "scissors" || playerChoice == "lizard" || playerChoice == "spock")
-            {
-                turn.PlayerChoice = playerChoice;
-                turn.ComputerChoice = GenerateComputerChoice(); ;
-                Console.WriteLine("You chose: " + turn.PlayerChoice);
-                Console.WriteLine("Computer chose: " + turn.ComputerChoice);
-                this.turnCount++;
-                TurnResult(turn);                
-            }
-            else
-            {
-                Console.WriteLine("This option is not valid please choose again.");
-            }
+        public Turn PlayTurn()
+        {            
+            Turn turn = new Turn();//instantianting object from Turn model class            
+            turn.PlayerName = this.player;
+            turn.PlayerChoice = GetPlayerChoice();
+            return turn;            
         }
 
         public string GetPlayerChoice()
@@ -100,14 +127,14 @@ namespace RockPaperScissors
             return playerChoice;
         }
 
-        public void TurnResult(Turn turn)
+        public string TurnResult(Turn turn)
         {
             switch (turn.PlayerChoice)
             {
                 case "rock":
                     if (turn.ComputerChoice == "lizard" || turn.ComputerChoice == "scissors")
                     {
-                        Console.WriteLine(turn.PlayerChoice + " defeats " + turn.ComputerChoice + ". You won!");
+                        Console.WriteLine(turn.PlayerChoice + " defeats " + turn.ComputerChoice + ". You won!");                        
                         turn.TurnResult = "Player won";
                     }
                     else if (turn.ComputerChoice == "spock" || turn.ComputerChoice == "paper")
@@ -196,15 +223,9 @@ namespace RockPaperScissors
             }
             turn.TurnEndTime = DateTime.Now;
             applicationRepository.InsertTurnInDatabase(turn);
-        }
 
-        string GenerateComputerChoice()
-        {
-            var randomFactor = new Random();
-            var possibleChoices = new List<string> { "rock", "paper", "scissors", "lizard", "spock" };
-            int randomIndex = randomFactor.Next(possibleChoices.Count);
-            return possibleChoices[randomIndex];
-        }
+            return turn.TurnResult;
+        }        
         
     }
 }

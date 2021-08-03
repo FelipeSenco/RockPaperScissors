@@ -9,6 +9,7 @@ GameID INT PRIMARY KEY IDENTITY(1,1),
 PlayerName NVARCHAR(MAX),
 PlayerTurnWins INT,
 ComputerTurnWins INT,
+TurnDraws INT,
 GameResult NVARCHAR(MAX),
 GameEndTime DATETIME
 )

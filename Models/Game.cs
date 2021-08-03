@@ -16,6 +16,7 @@ namespace RockPaperScissors.Models
         public string PlayerName { get; set; }
         public int PlayerTurnWins { get; set; }
         public int ComputerTurnWins { get; set; }
+        public int TurnDraws { get; set; }
 
         public string GameResult { get; set; }
 

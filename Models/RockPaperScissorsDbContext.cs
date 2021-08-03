@@ -12,7 +12,7 @@ namespace RockPaperScissors.Models
     public class RockPaperScissorsDbContext : DbContext
     {
         //Constructor with the connection string defined in App.config
-        public RockPaperScissorsDbContext() : base("RockpaperScissorsDbConn")
+        public RockPaperScissorsDbContext() : base("RockPaperScissorsDbConn")
         {
          
         }

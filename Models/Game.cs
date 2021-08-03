@@ -10,8 +10,7 @@ namespace RockPaperScissors.Models
 {
     public class Game
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key]        
         public int GameID { get; set; }
 
         public string PlayerName { get; set; }

@@ -25,5 +25,8 @@ namespace RockPaperScissors.Models
         public DateTime TurnEndTime { get; set; }
 
         public int GameID { get; set; }
+
+        [ForeignKey("GameID")]
+        public virtual Game Game { get; set; }
     }
 }

@@ -3,12 +3,12 @@ C#.Net Console app to play Rock, Paper, Scissors with a twist: Lizard and Spock!
 The games a stored in a Sql local database
 
 Thr rules are: Rock beats Scissors and Lizard; Paper beats Rock and Spock; Scissors beats Paper and Lizard; Lizard beats Spock and Paper; Spock beats Rock and Scissors
-Best of 7: the first to rach 4 turn wins is the winner
+Best of 7: the first to reach 4 turn wins is the winner
 
 Application Flow:
 
 ===============================Program.cs==================================
-Inside the main method the initial outputs to the user are displayed.
+Inside the main method, the initial outputs to the user are displayed
 Get the player name through user input
 Call the PlayGame() method of GameContext.cs if the gamePlaying variable is true
 
@@ -37,14 +37,14 @@ Call PlayGain() method
 
 ------PlayAgain()------
 Ask the user if another game should start
-returns true or false based on the user input
+Returns true or false based on the user input
 
 
 ------DisplayMostUsedMoves(List of turns, isPlayer)------
 This method has logic to retrieve the most used moves
 It access the player most used methods if isPlayer = true, if it is false it access the computer most used moves instead
 
-------DisplayMostUsedMoves(current turn)------
+------AddTurnToList(current turn)------
 This method will instantiate an object from the Turn.cs as this is the model used to store data at database
 It will migrate the data from TurnContext object to Turn object
 uses applicationRepository to get right .GameID for the turn
@@ -70,19 +70,19 @@ This model class object is used to store Game data in the database
 
 ===============================TurnContext.cs==================================
 
-In this namespace 2 Enumerators are defined to avoid typing erros: Choice and Result
+In this namespace 2 Enumerators are defined, Choice and Result, to avoid typing erros when checking conditions
 This class will handle the turns logic
 Properties: .player .playerChoice .computerChoice .turnResult .turnEndTime
 
 ------GetPlayerChoice()------
 This method will ask the user to input a choice of number, check if it is a valid choice
 Get the corresponding choice from the Choice enumerator
-store the choice at .playerChoice property
+Store the choice at .playerChoice property
 
 ------GetComputerChoice()------
 This method will generate a random index
 Get the choice from the Choice enumerator using the random index
-store the choice at .computerChoice property
+Store the choice at .computerChoice property
 
 ------GetTurnResult()------
 This method will check the turn winner based on the Game rules
@@ -105,9 +105,8 @@ This model class object is used to store Game data in the database
 This class inherits from DbContext (from entityFramework package)
 At the constructor of the class it references the connection string defined att App.config to connect with Sql server
 It defines DbSet<Turn> and DbSet<Game> with getters and setters for operations in database
-Make sure to change the Data Source attribute of the connection string at App.config to use your own localserver.
   
-  ****In order to run this application on your pc:*****
+  ****In order to run this application on your pc:****
 MAKE SURE TO CHANGE THE 'DATA SOURCE' ATTRIBUTE OF THE CONNECTION STRING AT APP.CONFIG TO USE YOUR OWN LOCALSERVER
   
 

@@ -13,6 +13,7 @@ namespace RockPaperScissors.Repositories
         void InsertGameInDatabase(Game game, List<Turn> turns);
         int GetLatestGameID();        
     }
+
     public class ApplicationRepository : IApplicationRepository
     {
         RockPaperScissorsDbContext db;  
@@ -22,7 +23,6 @@ namespace RockPaperScissors.Repositories
         {
             db = new RockPaperScissorsDbContext();//instatiating the db context
         }
-
 
         //InsertTurnsInDatabase Method
         public void InsertTurnsInDatabase(List<Turn> turns)

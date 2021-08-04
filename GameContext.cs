@@ -36,24 +36,28 @@ namespace RockPaperScissors
                 TurnContext currentTurn = new TurnContext(this.player);//creating an objec for the turn context  class              
                 currentTurn.GetPlayerChoice();//get the player move
                 currentTurn.GenerateComputerChoice();//get the computer move
-                
-                    Console.WriteLine("Turn Number: " + (this.gameTurns.Count() + 1));//get the current turn number by adding 1 to the list of turns                    
 
-                    Console.WriteLine("You chose: " + currentTurn.playerChoice);
-                    Console.WriteLine("Computer chose: " + currentTurn.computerChoice);
+                Console.WriteLine("");
+                Console.WriteLine("Turn Number: " + (this.gameTurns.Count() + 1));//get the current turn number by adding 1 to the list of turns                    
+                Console.WriteLine("You chose: " + currentTurn.playerChoice);
+                Console.WriteLine("Computer chose: " + currentTurn.computerChoice);
 
-                    currentTurn.GetTurnResult();//get the result the turn from TurnContext.cs method;
+                currentTurn.GetTurnResult();//get the result the turn from TurnContext.cs method;
                                                 //
-                    IncrementCounts(currentTurn.turnResult);//calling IncrementAndDisplayCounts to update values
+                IncrementCounts(currentTurn.turnResult);//calling IncrementAndDisplayCounts to update values
 
-                    Console.WriteLine("You won: " + this.playerTurnWins);
-                    Console.WriteLine("Computer won: " + this.computerTurnWins);
-                    Console.WriteLine("Draws: " + this.turnDraws);
+                Console.WriteLine("");
+                Console.WriteLine("You won: " + this.playerTurnWins + " turn(s)");
+                Console.WriteLine("Computer won: " + this.computerTurnWins + " turn(s)");
+                Console.WriteLine("Draws: " + this.turnDraws);
 
-                    AddTurnToList(currentTurn); //add the current turn to the list of Turn objects that will be sent to database  after the game ends
+                AddTurnToList(currentTurn); //add the current turn to the list of Turn objects that will be sent to database  after the game ends
                 
             }
-
+            Console.WriteLine("");
+            Console.WriteLine("The game has ended, press any key to see the result");
+            Console.ReadLine();
+            
             //interactions after leaving the game loop
             Console.WriteLine("");
             Console.WriteLine("");
@@ -67,7 +71,6 @@ namespace RockPaperScissors
             Console.WriteLine("");
 
             return FinishGame();//Finish game once a player reach 4 wins and the while loop is interrupted. Return is used to get the bool value that will be used at Program.cs to decide if another game will be played
-            
         }
         
         //incrementCounts Method
@@ -95,13 +98,13 @@ namespace RockPaperScissors
             
             if (this.playerTurnWins > this.computerTurnWins)//player win
             {
-                Console.WriteLine("Congratilations! You've won the game!");
+                Console.WriteLine("Congratulations! You've won the game!");
 
                 this.gameResult = Result.Player;
             }
             else//computer win
             {
-                Console.WriteLine("Oops! Computer has won the game!");
+                Console.WriteLine("Computer has won the game!");
 
                 this.gameResult = Result.Computer;
             }
@@ -155,9 +158,8 @@ namespace RockPaperScissors
 
             foreach (var usedChoice in mostCommons)//iterate through mostCommons and outputting to the user
             {
-                Console.WriteLine(usedChoice);
-            }
-            Console.WriteLine("Used " + maxCount + " time(s)");
+                Console.WriteLine(usedChoice + "(" + maxCount + " time(s))");
+            }            
         }        
         
 

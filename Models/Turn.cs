@@ -23,7 +23,7 @@ namespace RockPaperScissors.Models
         public string TurnResult { get; set; }
 
         public DateTime TurnEndTime { get; set; }
-        
+             
         public int GameID { get; set; }        
     }
 }

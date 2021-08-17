@@ -4,19 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RockPaperScissors.Models;
-using RockPaperScissors.Repositories;
+using RockPaperScissors.Services;
 
 namespace RockPaperScissors
 {
     public class GameContext
     {
         //Decaring variables        
-        int playerTurnWins;//global variable to track if a player reach 4 wins to finish the game
-        int computerTurnWins;//global variable to track if a player reach 4 wins to finish the game
-        int turnDraws;//global variable to track turn draws
-        Result gameResult;//variable to store the game result form the Result enumerator type (defined in TurnContext class)
-        public string player;   
-        public List<Turn> gameTurns;//list to store the turn objects for this game
+        public int playerTurnWins;//global variable to track if a player reach 4 wins to finish the game
+        public int computerTurnWins;//global variable to track if a player reach 4 wins to finish the game
+        public int turnDraws;//global variable to track turn draws
+        public Result gameResult;//variable to store the game result form the Result enumerator type (defined in TurnContext class)
+        public string player;
+        public List<TurnContext> gameTurns;//list to store the turn objects for this game       
 
         //CONSTRUCTOR
         public GameContext(string player)
@@ -25,7 +25,7 @@ namespace RockPaperScissors
             this.playerTurnWins = 0;//resetting count
             this.computerTurnWins = 0;//resetting count
             this.turnDraws = 0;//resetting count
-            this.gameTurns = new List<Turn>();//creating an empty list that will store the turns object from Turn.cs from this game  for further insertion in database                    
+            this.gameTurns = new List<TurnContext>();//creating an empty list that will store the turns object from TurnContext.cs from this game  for further insertion in database                                
         }
 
         //PlayGame method
@@ -51,6 +51,7 @@ namespace RockPaperScissors
                 Console.WriteLine("Computer won: " + this.computerTurnWins + " turn(s)");
                 Console.WriteLine("Draws: " + this.turnDraws);
 
+                currentTurn.turnEndTime = DateTime.Now;
                 AddTurnToList(currentTurn); //add the current turn to the list of Turn objects that will be sent to database  after the game ends
                 
             }
@@ -109,7 +110,7 @@ namespace RockPaperScissors
                 this.gameResult = Result.Computer;
             }
 
-            AddGameToDatabase();//calling method to insert the game data and its turns in the database
+            SendGameToService();//calling method to call the service 
             return PlayAgain();//returning Play Again and getting bool value depending on user input
         }
 
@@ -135,14 +136,14 @@ namespace RockPaperScissors
         }
 
         //DisplayMostUsedMoves Method
-        public void DisplayMostUsedMoves(List<Turn> turns, bool isPlayer = true)
+        public void DisplayMostUsedMoves(List<TurnContext> turns, bool isPlayer = true)
         {
             List<String> moves = new List<String>(); //list to store the moves of the game
 
             foreach (var turn in turns)//iterate through the turn list for this game
             {
                 string choice;
-                choice = isPlayer ? turn.PlayerChoice : turn.ComputerChoice; //check to see isPlayer = true or not and use playerChoice or computerChoice depending on condition                        
+                choice = isPlayer ? Convert.ToString(turn.playerChoice) : Convert.ToString(turn.computerChoice); //check to see isPlayer = true or not and use playerChoice or computerChoice depending on condition                        
                 moves.Add(choice); //add move to moves list
             }
 
@@ -164,33 +165,18 @@ namespace RockPaperScissors
         
 
         //AddTurnsToList Method
-        public void AddTurnToList(TurnContext currentTurn)//this method will pass the TurnContext object properties to a TurnModel object that will be stored in a list for further insertion at databse
-        {
-            IApplicationRepository repository = new ApplicationRepository();//instantiating a repository to get the current gameID using getLatestGameID();
-            
-            Turn turn = new Turn();
-            turn.GameID = repository.GetLatestGameID() + 1;//setting the correct GameID for this turn
-            turn.PlayerName = currentTurn.player;
-            turn.PlayerChoice = Convert.ToString(currentTurn.playerChoice);//converting the choice from the enumerator into string for database storage
-            turn.ComputerChoice = Convert.ToString(currentTurn.computerChoice);//converting the choice from the enumerator into string for database storage
-            turn.TurnResult = Convert.ToString(currentTurn.turnResult);//converting the result from the enumerator into string for database storage
-            turn.TurnEndTime = DateTime.Now;            
-            this.gameTurns.Add(turn);//finally add the turn to list that will be accessed at AddGameToDatabase to add the turns of the game to the turns table
+        public void AddTurnToList(TurnContext currentTurn)//this method will pass the TurnContext object to the list of turns for this game
+        {                         
+            this.gameTurns.Add(currentTurn);//
         }
 
         //AddGameToDatabase Method
-        public void AddGameToDatabase() //method to call the repository and pass the game and turns models to be added at their respective table at database
-        {            
-            Game game = new Game();//creating an object of game model to send to repository
-            game.PlayerName = this.player;
-            game.PlayerTurnWins = this.playerTurnWins;
-            game.ComputerTurnWins = this.computerTurnWins;
-            game.TurnDraws = this.turnDraws;
-            game.GameResult = Convert.ToString(this.gameResult) + " won";//converting the result from Result enumerator to string and " won" to storage at database
-            game.GameEndTime = DateTime.Now;
-
-            IApplicationRepository repository = new ApplicationRepository();//creating an instance of repository to call database related method
-            repository.InsertGameInDatabase(game, this.gameTurns);
+        public void SendGameToService() //method to call the service and pass the gamecontext model and the list of turncontext from the game
+        {
+            ApplicationService applicationService = new ApplicationService();
+            applicationService.InsertGame(this);
+            applicationService.InsertTurns(this.gameTurns);
+            
         }
               
     }

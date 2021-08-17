@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RockPaperScissors.Models;
-using RockPaperScissors.Repositories;
+using RockPaperScissors.Services;
 
 namespace RockPaperScissors
 {    
     public class Program
-    {                
+    {              
         static void Main(string[] args)
         {            
                 Console.WriteLine("Welcome, in this application you will be playing Rock, Paper, Scissors against the computer.");
@@ -22,7 +22,7 @@ namespace RockPaperScissors
                 Console.ReadLine();
 
                 bool gamePlaying = true;
-
+                
                 while (gamePlaying) //loop to check if there will be another game after one finishes
                 {
                     GameContext newGameContext = new GameContext(playerName);

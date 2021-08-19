@@ -45,17 +45,13 @@ This method has logic to retrieve the most used moves
 It access the player most used methods if isPlayer = true, if it is false it access the computer most used moves instead
 
 ------AddTurnToList(current turn)------
-This method will instantiate an object from the Turn.cs as this is the model used to store data at database
-It will migrate the data from TurnContext object to Turn object
-uses applicationRepository to get right .GameID for the turn
-Add the turn to .gameTurns list of TurnContext object
+This method will add the currentTurn instantiaded from TurnContext class to the gameTurns(from GameContext) list.
 
 
-------AddGameToDatabase()------
-This method will instantiate an object from the Game.cs as this is the model used to store data at database
-It will migrate the data from GameContext object to Game object
-Uses applicationRepository to call InsertGameInDatabase() method
-
+------SendGameToService()------
+This method will instantiate an object from application service
+It calls the InsertGame Method from the service with the gamecontext object itself as a parameter
+It calls the InsertTurns method from the service with the list of TurnContexts objects from the gameContext object
 
 
 
@@ -110,7 +106,16 @@ It defines DbSet<Turn> and DbSet<Game> with getters and setters for operations i
 MAKE SURE TO CHANGE THE 'DATA SOURCE' ATTRIBUTE OF THE CONNECTION STRING AT APP.CONFIG TO USE YOUR OWN LOCALSERVER
   
 
+===============================ApplicationService.cs==================================
+------IApplicationServicey------
+This interface defines the methods that must be implemented by the ApplicationService class
   
+------ApplicationService------
+At the constructor a ApplicationRepository object is instantiated
+This class implement the three methods declared at the interface:
+  -GetLatestGameID
+  -InsertGame
+  -InsertTurns  
   
   
 ===============================ApplicationRepository.cs==================================
@@ -125,7 +130,7 @@ At the constructor a RockPaperScissorsDbContext object is instantiated
 This class implement the three methods declared at the interface:
   -InsertTurnsInDatabase
   -InsertGameInDatabase
-  -GetLatestGameID()
+  -GetLatestGameID
   
 
 ===============================RockPaperScissorsCreateDatabase.sql==================================  

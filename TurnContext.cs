@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RockPaperScissors.Models;
-using RockPaperScissors.Repositories;
 
 namespace RockPaperScissors
-{    
-    
+{
+
     public class TurnContext
     {        
         //Declaring variables

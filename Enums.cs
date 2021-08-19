@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RockPaperScissors
+﻿namespace RockPaperScissors
 {
     public enum Choice//Enumerator to use the choices in a strongly typed way instead of using strings that are prone to typing errors
     {

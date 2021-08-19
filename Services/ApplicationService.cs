@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using RockPaperScissors.Models;
 using RockPaperScissors.Repositories;
-using RockPaperScissors.Models;
+using System;
+using System.Collections.Generic;
 
 namespace RockPaperScissors.Services
 {
